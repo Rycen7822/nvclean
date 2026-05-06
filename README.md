@@ -18,6 +18,21 @@ nvclean
 
 Fall back to `nvidia-smi` only when `nvclean` is unavailable or when you need fields outside this compact status view.
 
+For even tighter polling output, use `nvmini`. It omits time, driver details, PCI/display/ECC/compute-mode fields, GPU names, and process memory. The fixed field order is:
+
+```text
+g<gpu> <used>/<total>MiB <util> <temp> <power>
+p<gpu> <type> <pid> <process>
+```
+
+Example:
+
+```text
+g0 10084/32607MiB 90% 66C 573.5W
+p0 C 645937 python3.12
+p0 G 28 Xwayland
+```
+
 ## Requirements
 
 - NVIDIA GPU with a working NVIDIA driver
@@ -39,6 +54,8 @@ If `nvml.h` is missing on WSL, install the CUDA Toolkit package, not the Linux d
 ```bash
 make
 ```
+
+This builds both `nvclean` and `nvmini`.
 
 For WSL, the default Makefile settings use:
 
@@ -71,6 +88,8 @@ This installs to `~/.local/bin/nvclean` by default. Override `PREFIX` if needed:
 make install PREFIX=/usr/local
 ```
 
+`make install` installs both `nvclean` and `nvmini`.
+
 ## Codex skill
 
 This repository includes a small Codex skill at `skills/nvclean/SKILL.md`. Copy or install that skill into your agent's skill directory if you want future agents to prefer `nvclean` over `nvidia-smi` for routine GPU checks.
@@ -78,7 +97,7 @@ This repository includes a small Codex skill at `skills/nvclean/SKILL.md`. Copy 
 Prompt for an agent to install both `nvclean` and the skill:
 
 ```text
-Install nvclean and its Codex skill for this user. Use https://github.com/Rycen7822/nvclean. Clone or update it under /tmp/nvclean, build with make, install with make install PREFIX="$HOME/.local", ensure ~/.local/bin is on PATH for future shells, copy skills/nvclean/SKILL.md to ~/.codex/skills/nvclean/SKILL.md, then verify with command -v nvclean and nvclean. On WSL, do not install Linux NVIDIA display drivers. If linking fails because libnvidia-ml.so is missing, retry make with LDLIBS=/usr/lib/wsl/lib/libnvidia-ml.so.1.
+Install nvclean and its Codex skill for this user. Use https://github.com/Rycen7822/nvclean. Clone or update it under /tmp/nvclean, build with make, install with make install PREFIX="$HOME/.local", ensure ~/.local/bin is on PATH for future shells, copy skills/nvclean/SKILL.md to ~/.codex/skills/nvclean/SKILL.md, then verify with command -v nvclean, command -v nvmini, nvclean, and nvmini. On WSL, do not install Linux NVIDIA display drivers. If linking fails because libnvidia-ml.so is missing, retry make with LDLIBS=/usr/lib/wsl/lib/libnvidia-ml.so.1.
 ```
 
 ## Example

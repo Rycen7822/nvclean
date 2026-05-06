@@ -9,22 +9,26 @@ CFLAGS ?= -O3 -march=native -DNDEBUG -Wall -Wextra -Wno-deprecated-declarations
 LDFLAGS ?= -L$(NVML_LIBDIR) -Wl,-rpath,$(NVML_LIBDIR)
 LDLIBS ?= -lnvidia-ml
 
-TARGET := nvclean
-SRC := nvclean.c
+TARGETS := nvclean nvmini
 
 .PHONY: all clean install uninstall
 
-all: $(TARGET)
+all: $(TARGETS)
 
-$(TARGET): $(SRC)
+nvclean: nvclean.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LDLIBS)
 
-install: $(TARGET)
+nvmini: nvmini.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LDLIBS)
+
+install: $(TARGETS)
 	install -d $(DESTDIR)$(PREFIX)/bin
-	install -m 755 $(TARGET) $(DESTDIR)$(PREFIX)/bin/$(TARGET)
+	install -m 755 nvclean $(DESTDIR)$(PREFIX)/bin/nvclean
+	install -m 755 nvmini $(DESTDIR)$(PREFIX)/bin/nvmini
 
 uninstall:
-	rm -f $(DESTDIR)$(PREFIX)/bin/$(TARGET)
+	rm -f $(DESTDIR)$(PREFIX)/bin/nvclean
+	rm -f $(DESTDIR)$(PREFIX)/bin/nvmini
 
 clean:
-	rm -f $(TARGET) *.o
+	rm -f $(TARGETS) *.o
