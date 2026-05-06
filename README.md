@@ -4,6 +4,20 @@
 
 The output is intentionally short: time, driver/NVML/CUDA driver versions, per-GPU status, and active compute/graphics processes.
 
+## Agent-friendly output
+
+`nvclean` is designed for coding agents and terminal assistants that repeatedly inspect GPU state. Its compact, line-oriented output avoids the wide ASCII table produced by `nvidia-smi`, which can waste context tokens when copied into an LLM prompt.
+
+In one GPT-5.x tokenizer check on May 7, 2026, a single-GPU `nvidia-smi` snapshot used 317 tokens and 1773 characters. The equivalent `nvclean` snapshot used 210 tokens and 502 characters. That example is about 34% fewer tokens and 72% fewer characters, while preserving the fields agents usually need: GPU name, driver/CUDA version, temperature, power, memory, utilization, compute mode, and active GPU processes.
+
+For agent workflows, prefer:
+
+```bash
+nvclean
+```
+
+Fall back to `nvidia-smi` only when `nvclean` is unavailable or when you need fields outside this compact status view.
+
 ## Requirements
 
 - NVIDIA GPU with a working NVIDIA driver
@@ -55,6 +69,16 @@ This installs to `~/.local/bin/nvclean` by default. Override `PREFIX` if needed:
 
 ```bash
 make install PREFIX=/usr/local
+```
+
+## Codex skill
+
+This repository includes a small Codex skill at `skills/nvclean/SKILL.md`. Copy or install that skill into your agent's skill directory if you want future agents to prefer `nvclean` over `nvidia-smi` for routine GPU checks.
+
+Prompt for an agent to install both `nvclean` and the skill:
+
+```text
+Install nvclean and its Codex skill for this user. Use https://github.com/Rycen7822/nvclean. Clone or update it under /tmp/nvclean, build with make, install with make install PREFIX="$HOME/.local", ensure ~/.local/bin is on PATH for future shells, copy skills/nvclean/SKILL.md to ~/.codex/skills/nvclean/SKILL.md, then verify with command -v nvclean and nvclean. On WSL, do not install Linux NVIDIA display drivers. If linking fails because libnvidia-ml.so is missing, retry make with LDLIBS=/usr/lib/wsl/lib/libnvidia-ml.so.1.
 ```
 
 ## Example

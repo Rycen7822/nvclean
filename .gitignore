@@ -1,4 +1,4 @@
-nvclean
+/nvclean
 *.o
 *.so
 *.dylib
