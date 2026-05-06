@@ -6,9 +6,23 @@ The output is intentionally short: time, driver/NVML/CUDA driver versions, per-G
 
 ## Agent-friendly output
 
-`nvclean` is designed for coding agents and terminal assistants that repeatedly inspect GPU state. Its compact, line-oriented output avoids the wide ASCII table produced by `nvidia-smi`, which can waste context tokens when copied into an LLM prompt.
+`nvclean` and `nvmini` are designed for coding agents and terminal assistants that repeatedly inspect GPU state. Their compact, line-oriented output avoids the wide ASCII table produced by `nvidia-smi`, which can waste context tokens when copied into an LLM prompt.
 
-In one GPT-5.x tokenizer check on May 7, 2026, a single-GPU `nvidia-smi` snapshot used 317 tokens and 1773 characters. The equivalent `nvclean` snapshot used 210 tokens and 502 characters. That example is about 34% fewer tokens and 72% fewer characters, while preserving the fields agents usually need: GPU name, driver/CUDA version, temperature, power, memory, utilization, compute mode, and active GPU processes.
+In one GPT-5.x & O1/O3 tokenizer check on May 7, 2026:
+
+| Tool | Tokens | Characters | Token reduction vs `nvidia-smi` | Character reduction vs `nvidia-smi` |
+| --- | ---: | ---: | ---: | ---: |
+| `nvidia-smi` | 317 | 1773 | baseline | baseline |
+| `nvclean` | 210 | 502 | 34% | 72% |
+| `nvmini` | 41 | 72 | 87% | 96% |
+
+Screenshots from that tokenizer check:
+
+<p>
+  <img src="assets/tokenizer/nvidia-smi.png" alt="nvidia-smi tokenizer usage" width="32%">
+  <img src="assets/tokenizer/nvclean.png" alt="nvclean tokenizer usage" width="32%">
+  <img src="assets/tokenizer/nvmini.png" alt="nvmini tokenizer usage" width="32%">
+</p>
 
 For agent workflows, prefer:
 
@@ -90,17 +104,28 @@ make install PREFIX=/usr/local
 
 `make install` installs both `nvclean` and `nvmini`.
 
-## Codex skill
+## Codex skills
 
-This repository includes a small Codex skill at `skills/nvclean/SKILL.md`. Copy or install that skill into your agent's skill directory if you want future agents to prefer `nvclean` over `nvidia-smi` for routine GPU checks.
+This repository includes two small Codex skills:
 
-Prompt for an agent to install both `nvclean` and the skill:
+- `skills/nvclean/SKILL.md`: prefer `nvclean` over `nvidia-smi`
+- `skills/nvmini/SKILL.md`: prefer `nvmini` for the shortest routine GPU checks
+
+Prompt for an agent to install only `nvclean` and the `nvclean` skill:
 
 ```text
-Install nvclean and its Codex skill for this user. Use https://github.com/Rycen7822/nvclean. Clone or update it under /tmp/nvclean, build with make, install with make install PREFIX="$HOME/.local", ensure ~/.local/bin is on PATH for future shells, copy skills/nvclean/SKILL.md to ~/.codex/skills/nvclean/SKILL.md, then verify with command -v nvclean, command -v nvmini, nvclean, and nvmini. On WSL, do not install Linux NVIDIA display drivers. If linking fails because libnvidia-ml.so is missing, retry make with LDLIBS=/usr/lib/wsl/lib/libnvidia-ml.so.1.
+Install nvclean only. Use https://github.com/Rycen7822/nvclean. Clone or update it under /tmp/nvclean, build with make nvclean, install ./nvclean to ~/.local/bin/nvclean, ensure ~/.local/bin is on PATH for future shells, copy skills/nvclean/SKILL.md to ~/.codex/skills/nvclean/SKILL.md, then verify with command -v nvclean and nvclean. Do not install nvmini or the nvmini skill. On WSL, do not install Linux NVIDIA display drivers. If linking fails because libnvidia-ml.so is missing, retry with make nvclean LDLIBS=/usr/lib/wsl/lib/libnvidia-ml.so.1.
 ```
 
-## Example
+Prompt for an agent to install only `nvmini` and the `nvmini` skill:
+
+```text
+Install nvmini only. Use https://github.com/Rycen7822/nvclean. Clone or update it under /tmp/nvclean, build with make nvmini, install ./nvmini to ~/.local/bin/nvmini, ensure ~/.local/bin is on PATH for future shells, copy skills/nvmini/SKILL.md to ~/.codex/skills/nvmini/SKILL.md, then verify with command -v nvmini and nvmini. Do not install nvclean or the nvclean skill. On WSL, do not install Linux NVIDIA display drivers. If linking fails because libnvidia-ml.so is missing, retry with make nvmini LDLIBS=/usr/lib/wsl/lib/libnvidia-ml.so.1.
+```
+
+## Examples
+
+`nvclean`:
 
 ```text
 Time: Thu May  7 00:28:37 2026
@@ -119,6 +144,14 @@ Processes:
 ```
 
 Process memory may be reported as `N/A` on WSL/Windows WDDM systems because that NVML field is not always available there.
+
+`nvmini`:
+
+```text
+g0 10084/32607MiB 90% 66C 573.5W
+p0 C 645937 python3.12
+p0 G 28 Xwayland
+```
 
 ## License
 
