@@ -1,0 +1,11 @@
+nvclean
+*.o
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+
+.cache/
+.vscode/
+.idea/
